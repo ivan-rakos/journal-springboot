@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,11 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.trading.trading.dto.AccountDTO;
 import com.example.trading.trading.dto.CreateAccountDTO;
 import com.example.trading.trading.dto.TradeSummaryDTO;
+import com.example.trading.trading.dto.UpdateAccountDTO;
 import com.example.trading.trading.mappers.AccountMapper;
 import com.example.trading.trading.mappers.TradeMapper;
 import com.example.trading.trading.models.Account;
 import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.services.AccountService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -51,12 +53,12 @@ public class AccountController {
     }
 
     @PostMapping
-    public Account create(@RequestBody CreateAccountDTO account) {
+    public Account create(@Valid @RequestBody CreateAccountDTO account) {
         return service.createAccount(account);
     }
 
     @PatchMapping("/{accountId}")
-    public Account updateAccount(@PathVariable Long accountId, @RequestBody Account updatedAccount) {
+    public Account updateAccount(@PathVariable Long accountId, @Valid @RequestBody UpdateAccountDTO updatedAccount) {
         return service.updateAccount(accountId, updatedAccount);
     }
 
