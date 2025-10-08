@@ -1,0 +1,69 @@
+package com.example.trading.trading.controllers;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.trading.trading.dto.AccountDTO;
+import com.example.trading.trading.dto.CreateAccountDTO;
+import com.example.trading.trading.dto.TradeSummaryDTO;
+import com.example.trading.trading.mappers.AccountMapper;
+import com.example.trading.trading.mappers.TradeMapper;
+import com.example.trading.trading.models.Account;
+import com.example.trading.trading.models.Trade;
+import com.example.trading.trading.services.AccountService;
+
+@RestController
+@RequestMapping("/api/accounts")
+public class AccountController {
+
+    private final AccountService service;
+
+    public AccountController(AccountService service) {
+        this.service = service;
+    }
+
+    @GetMapping
+    public List<AccountDTO> getAccounts() {
+        List<Account> accounts = service.getAllAccounts();
+        return AccountMapper.accountToDTOList(accounts);
+    }
+
+    @GetMapping("/{accountId}")
+    public AccountDTO getAccountById(@PathVariable Long accountId) {
+        Account account = service.getById(accountId).get();
+        return AccountMapper.accountToDTO(account);
+    }
+
+    @GetMapping("/{accountId}/trades")
+    public List<TradeSummaryDTO> getTradesByAccountId(@PathVariable Long accountId) {
+        List<Trade> trades = service.getTradesByAccountId(accountId);
+        return TradeMapper.tradeToSummaryDTOList(trades);
+    }
+
+    @PostMapping
+    public Account create(@RequestBody CreateAccountDTO account) {
+        return service.createAccount(account);
+    }
+
+    @PatchMapping("/{accountId}")
+    public Account updateAccount(@PathVariable Long accountId, @RequestBody Account updatedAccount) {
+        return service.updateAccount(accountId, updatedAccount);
+    }
+
+    @DeleteMapping("/{accountId}")
+    public ResponseEntity<Void> delete(@PathVariable Long accountId) {
+        service.deleteAccount(accountId);
+        return ResponseEntity.noContent().build();
+    }
+
+}
