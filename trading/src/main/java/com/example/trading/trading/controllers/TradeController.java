@@ -20,6 +20,8 @@ import com.example.trading.trading.mappers.TradeMapper;
 import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.services.TradeService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("api/trades")
 public class TradeController {
@@ -42,13 +44,13 @@ public class TradeController {
     }
 
     @PostMapping
-    public TradeDTO createTrade(@RequestBody CreateTradeDTO tradeDTO) {
+    public TradeDTO createTrade(@Valid @RequestBody CreateTradeDTO tradeDTO) {
         Trade trade = service.addTrade(tradeDTO);
         return TradeMapper.tradeToDTO(trade);
     }
 
     @PatchMapping("/{tradeId}")
-    public TradeDTO updateTrade(@PathVariable Long tradeId, @RequestBody UpdateTradeDTO trade) {
+    public TradeDTO updateTrade(@PathVariable Long tradeId, @Valid @RequestBody UpdateTradeDTO trade) {
         Trade tradeUpdated = service.updateTrade(tradeId, trade);
         return TradeMapper.tradeToDTO(tradeUpdated);
     }

@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 import com.example.trading.trading.dto.CreateAccountDTO;
+import com.example.trading.trading.dto.UpdateAccountDTO;
 import com.example.trading.trading.models.Account;
 import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.repositories.AccountRepository;
@@ -40,15 +41,15 @@ public class AccountService {
         repo.deleteById(id);
     }
 
-    public Account updateAccount(Long id, Account updatedAccount) {
+    public Account updateAccount(Long id, UpdateAccountDTO updatedAccount) {
         Account account = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
         if (updatedAccount.getName() != null)
             account.setName(updatedAccount.getName());
         if (updatedAccount.getBalance() != null)
             account.setBalance(updatedAccount.getBalance());
-        if (updatedAccount.isActive() != account.isActive())
-            account.setActive(updatedAccount.isActive());
+        if (updatedAccount.getActive() != account.isActive())
+            account.setActive(updatedAccount.getActive());
         return repo.save(account);
     }
 
