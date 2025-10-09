@@ -21,6 +21,7 @@ public class CreateTradeDTOTest {
         dto.setSymbol("EURUSD");
         dto.setType("long");
         dto.setStrategy("Scalping");
+        dto.setState("Close by TP");
         dto.setSession("london");
         dto.setFeelings(List.of("confident", "nervous"));
         dto.setResult("win");
@@ -365,7 +366,7 @@ public class CreateTradeDTOTest {
         CreateTradeDTO dto = createValiTradeDTO();
         dto.setState(null);
         Set<ConstraintViolation<CreateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).isEmpty();
+        assertThat(errors).extracting("message").contains("State is required");
     }
 
     @Test
@@ -373,7 +374,7 @@ public class CreateTradeDTOTest {
         CreateTradeDTO dto = createValiTradeDTO();
         dto.setState("");
         Set<ConstraintViolation<CreateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).isEmpty();
+        assertThat(errors).extracting("message").contains("State is required");
     }
 
     @Test
@@ -381,7 +382,7 @@ public class CreateTradeDTOTest {
         CreateTradeDTO dto = createValiTradeDTO();
         dto.setState("   ");
         Set<ConstraintViolation<CreateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).isEmpty();
+        assertThat(errors).extracting("message").contains("State is required");
     }
 
     @Test
@@ -389,7 +390,7 @@ public class CreateTradeDTOTest {
         CreateTradeDTO dto = createValiTradeDTO();
         dto.setState("A".repeat(26));
         Set<ConstraintViolation<CreateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).extracting("message").contains("State cannot exceed 25 characters");
+        assertThat(errors).extracting("message").contains("State must be between 3 and 25 characters");
     }
 
     // TP tests are not needed as they are Booleans without constraints
@@ -448,6 +449,14 @@ public class CreateTradeDTOTest {
     void testWithValidAccountIds() {
         CreateTradeDTO dto = createValiTradeDTO();
         dto.setAccountIds(List.of(5L));
+        Set<ConstraintViolation<CreateTradeDTO>> errors = validator.validate(dto);
+        assertThat(errors).isEmpty();
+    }
+
+    // VALID DTO TEST
+    @Test
+    void testWithValidDTO() {
+        CreateTradeDTO dto = createValiTradeDTO();
         Set<ConstraintViolation<CreateTradeDTO>> errors = validator.validate(dto);
         assertThat(errors).isEmpty();
     }
