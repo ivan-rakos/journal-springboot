@@ -15,4 +15,12 @@ public class UpdateAccountDTO {
     @Digits(integer = 7, fraction = 2, message = "Balance must be a valid monetary amount")
     private Double balance;
     private Boolean active;
+
+    public void setName(String name) {
+        if (name != null) {
+            this.name = name.trim();
+        } else {
+            this.name = null;
+        }
+    }
 }

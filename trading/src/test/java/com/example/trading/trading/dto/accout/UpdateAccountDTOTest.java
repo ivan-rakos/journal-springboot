@@ -32,7 +32,7 @@ public class UpdateAccountDTOTest {
         dto.setBalance(null);
         dto.setActive(null);
         Set<ConstraintViolation<UpdateAccountDTO>> errors = validator.validate(dto);
-        assertThat(errors).extracting("message").contains("Name is required");
+        assertThat(errors).extracting("message").contains("Name must be between 3 and 50 characters");
     }
 
     @Test
