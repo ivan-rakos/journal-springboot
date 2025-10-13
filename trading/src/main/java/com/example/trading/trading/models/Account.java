@@ -28,7 +28,7 @@ public class Account {
     @EqualsAndHashCode.Include
     private Long id;
     private String name;
-    private Double balance;
+    private Double balance = 0.0;
     private boolean active = true;
 
     @ManyToMany

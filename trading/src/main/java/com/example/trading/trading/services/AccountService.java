@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.example.trading.trading.dto.CreateAccountDTO;
 import com.example.trading.trading.dto.UpdateAccountDTO;
+import com.example.trading.trading.exceptions.BusinessRuleException;
+import com.example.trading.trading.exceptions.ResourceNotFoundException;
 import com.example.trading.trading.models.Account;
 import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.repositories.AccountRepository;
@@ -23,6 +25,14 @@ public class AccountService {
     }
 
     public Account createAccount(CreateAccountDTO dto) {
+        if (repo.existsByName(dto.getName())) {
+            throw new BusinessRuleException("Account name already exists: " + dto.getName());
+        }
+
+        if (dto.getBalance() == null || dto.getBalance() < 0) {
+            throw new BusinessRuleException("Initial balance cannot be negative: " + dto.getBalance());
+        }
+
         Account account = new Account(dto.getName(), dto.getBalance());
         return repo.save(account);
     }
@@ -37,25 +47,30 @@ public class AccountService {
 
     public void deleteAccount(Long id) {
         if (!repo.existsById(id))
-            throw new RuntimeException("Account not found");
+            throw new ResourceNotFoundException("Account not found");
         repo.deleteById(id);
     }
 
     public Account updateAccount(Long id, UpdateAccountDTO updatedAccount) {
         Account account = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         if (updatedAccount.getName() != null)
             account.setName(updatedAccount.getName());
-        if (updatedAccount.getBalance() != null)
+        if (updatedAccount.getBalance() != null) {
+            if (updatedAccount.getBalance() < 0) {
+                throw new BusinessRuleException("Balance cannot be negative: " + updatedAccount.getBalance());
+            }
             account.setBalance(updatedAccount.getBalance());
-        if (updatedAccount.getActive() != account.isActive())
+        }
+
+        if (updatedAccount.getActive() != null)
             account.setActive(updatedAccount.getActive());
         return repo.save(account);
     }
 
     public List<Trade> getTradesByAccountId(Long id) {
         Account account = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found " + id));
         Set<Trade> trades = account.getTrades();
         return new ArrayList<>(trades);
     }
