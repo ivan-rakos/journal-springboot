@@ -233,7 +233,7 @@ public class AccountServiceTest {
         Account existingAccount = createValidAccount();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
-
+        when(accountRepository.existsById(accountId)).thenReturn(true);
         Optional<Account> account = accountService.getById(accountId);
         assertEquals(existingAccount, account.get());
 
