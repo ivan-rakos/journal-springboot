@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -64,6 +65,10 @@ public class AccountServiceTest {
         account.setBalance(2000.00);
         account.setActive(true);
         return account;
+    }
+
+    private List<Account> getAccountList() {
+        return List.of(createValidAccount(), updatedAccount());
     }
 
     // Create Account Tests
@@ -154,6 +159,25 @@ public class AccountServiceTest {
     }
 
     @Test
+    public void testUpdateAccount_SameName() {
+        Long accountId = 1L;
+        UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
+        updateAccountDTO.setName("Test Account");
+        Account accountToUpdate = updatedAccount();
+        Account accountWithSameName = createValidAccount();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(accountToUpdate));
+        when(accountRepository.existsByName("Test Account")).thenReturn(true);
+        when(accountRepository.findByName("Test Account")).thenReturn(accountWithSameName);
+
+        assertThrows(BusinessRuleException.class, () -> accountService.updateAccount(accountId, updateAccountDTO));
+
+        verify(accountRepository).findById(accountId);
+        verify(accountRepository).existsByName("Test Account");
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
     public void testUpdateAccount_InvalidBalance() {
         Long accountId = 1L;
         UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
@@ -175,7 +199,6 @@ public class AccountServiceTest {
         UpdateAccountDTO updateAccountDTO = new UpdateAccountDTO();
         updateAccountDTO.setName(newName);
         Account existingAccount = updatedAccount();
-        existingAccount.setName(newName);
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
@@ -189,4 +212,75 @@ public class AccountServiceTest {
         verify(accountRepository).findById(accountId);
         verify(accountRepository).save(any(Account.class));
     }
+
+    @Test
+    public void testUpdateAccount_NoChanges() {
+        Long accountId = 1L;
+        UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
+        Account existingAccount = updatedAccount();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        assertThrows(BusinessRuleException.class, () -> accountService.updateAccount(accountId, updateAccountDTO));
+
+        verify(accountRepository).findById(accountId);
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    // GET Account Tests
+    @Test
+    public void testGetById_Existing() {
+        Long accountId = 1L;
+        Account existingAccount = createValidAccount();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+
+        Optional<Account> account = accountService.getById(accountId);
+        assertEquals(existingAccount, account.get());
+
+        verify(accountRepository).findById(accountId);
+    }
+
+    @Test
+    public void testGetById_NonExistent() {
+        Long accountId = 1L;
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+        assertThrows(ResourceNotFoundException.class, () -> accountService.getById(accountId));
+        verify(accountRepository).existsById(accountId);
+        verify(accountRepository, never()).findById(accountId);
+    }
+
+    @Test
+    public void testGetAllAccounts() {
+        List<Account> accountsMock = getAccountList();
+        when(accountRepository.findAll()).thenReturn(accountsMock);
+        List<Account> accounts = accountService.getAllAccounts();
+        assertTrue(accounts.isEmpty() == false);
+        verify(accountRepository).findAll();
+    }
+
+    // Delete Account Tests
+    @Test
+    public void testDeleteAccount_Existing() {
+        Long accountId = 1L;
+
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+
+        accountService.deleteAccount(accountId);
+
+        verify(accountRepository).existsById(accountId);
+        verify(accountRepository).deleteById(accountId);
+    }
+
+    @Test
+    public void testDeleteAccount_NonExistent() {
+        Long accountId = 1L;
+
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        assertThrows(ResourceNotFoundException.class, () -> accountService.deleteAccount(accountId));
+
+        verify(accountRepository).existsById(accountId);
+        verify(accountRepository, never()).deleteById(accountId);
+    }
+
 }

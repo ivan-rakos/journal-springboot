@@ -7,4 +7,6 @@ import com.example.trading.trading.models.Account;
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
     public boolean existsByName(String name);
+
+    public Account findByName(String name);
 }

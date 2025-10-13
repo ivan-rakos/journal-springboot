@@ -38,6 +38,8 @@ public class AccountService {
     }
 
     public Optional<Account> getById(Long id) {
+        if (!repo.existsById(id))
+            throw new ResourceNotFoundException("Account with id " + id + " not found");
         return repo.findById(id);
     }
 
@@ -52,19 +54,36 @@ public class AccountService {
     }
 
     public Account updateAccount(Long id, UpdateAccountDTO updatedAccount) {
+        boolean changed = false;
         Account account = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
-        if (updatedAccount.getName() != null)
+        if (updatedAccount.getName() != null && !updatedAccount.getName().equals(account.getName())) {
+            Account existAccountSameName = repo.existsByName(updatedAccount.getName())
+                    ? repo.findByName(updatedAccount.getName())
+                    : null;
+            if (existAccountSameName != null && existAccountSameName.getId().longValue() == id.longValue()) {
+                throw new BusinessRuleException("Account name already exists: " + updatedAccount.getName());
+            }
             account.setName(updatedAccount.getName());
-        if (updatedAccount.getBalance() != null) {
+            changed = true;
+        }
+
+        if (updatedAccount.getBalance() != null
+                && updatedAccount.getBalance().doubleValue() != account.getBalance().doubleValue()) {
             if (updatedAccount.getBalance() < 0) {
                 throw new BusinessRuleException("Balance cannot be negative: " + updatedAccount.getBalance());
             }
             account.setBalance(updatedAccount.getBalance());
+            changed = true;
         }
 
-        if (updatedAccount.getActive() != null)
+        if (updatedAccount.getActive() != null && updatedAccount.getActive() != account.isActive()) {
             account.setActive(updatedAccount.getActive());
+            changed = true;
+        }
+        if (!changed) {
+            throw new BusinessRuleException("No fields to update");
+        }
         return repo.save(account);
     }
 
