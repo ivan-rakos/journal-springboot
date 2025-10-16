@@ -26,11 +26,11 @@ public class UpdateTradeDTO {
     @Pattern(regexp = "^(?i)(win|loss|breakeven)$", message = "Result must be 'win', 'loss', or 'breakeven'")
     private String result;
     @Size(max = 250, message = "Comment cannot exceed 250 characters")
-    private String comment;
+    private String comment = "";
     @URL(message = "Screenshoot must be a valid URL")
     private String screenshoot;
     @Size(min = 3, max = 25, message = "State must be between 3 and 25 characters")
-    private String state;
+    private String state = "";
     private Boolean tp1;
     private Boolean tp2;
     private Boolean tp3;

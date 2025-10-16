@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.trading.trading.dto.CreateTradeDTO;
 import com.example.trading.trading.dto.UpdateTradeDTO;
+import com.example.trading.trading.exceptions.ResourceNotFoundException;
 import com.example.trading.trading.models.Account;
 import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.repositories.AccountRepository;
@@ -30,6 +31,8 @@ public class TradeService {
     }
 
     public Optional<Trade> getTradeById(Long tradeId) {
+        if (!repo.existsById(tradeId))
+            throw new ResourceNotFoundException("Trade with id " + tradeId + " not found");
         return repo.findById(tradeId);
     }
 
@@ -50,7 +53,8 @@ public class TradeService {
         trade.setDate(tradeDTO.getDate());
 
         Set<Account> accounts = tradeDTO.getAccountIds().stream()
-                .map(id -> accountRepo.findById(id).orElseThrow(() -> new RuntimeException("Account not found " + id)))
+                .map(id -> accountRepo.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Account not found " + id)))
                 .collect(Collectors.toSet());
         trade.setAccounts(accounts);
 
@@ -60,7 +64,7 @@ public class TradeService {
 
     public Trade updateTrade(Long id, UpdateTradeDTO dto) {
         Trade trade = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trade not found " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Trade not found " + id));
 
         if (dto.getSymbol() != null)
             trade.setSymbol(dto.getSymbol());
@@ -74,11 +78,11 @@ public class TradeService {
             trade.setFeelings(dto.getFeelings());
         if (dto.getResult() != null)
             trade.setResult(dto.getResult());
-        if (dto.getComment() != null)
+        if (dto.getComment() != "")
             trade.setComment(dto.getComment());
-        if (dto.getScreenshoot() != null)
+        if (dto.getScreenshoot() != "")
             trade.setScreenshoot(dto.getScreenshoot());
-        if (dto.getState() != null)
+        if (dto.getState() != "")
             trade.setState(dto.getState());
         if (dto.getTp1() != null)
             trade.setTp1(dto.getTp1());
@@ -119,7 +123,7 @@ public class TradeService {
 
     public void deleteTradeById(Long id) {
         Trade trade = repo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Trade not found " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Trade not found " + id));
 
         for (Account account : trade.getAccounts()) {
             account.getTrades().remove(trade);
