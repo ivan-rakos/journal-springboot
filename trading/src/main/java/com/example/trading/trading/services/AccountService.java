@@ -61,7 +61,7 @@ public class AccountService {
             Account existAccountSameName = repo.existsByName(updatedAccount.getName())
                     ? repo.findByName(updatedAccount.getName())
                     : null;
-            if (existAccountSameName != null && existAccountSameName.getId().longValue() == id.longValue()) {
+            if (existAccountSameName != null && existAccountSameName.getId().longValue() != id.longValue()) {
                 throw new BusinessRuleException("Account name already exists: " + updatedAccount.getName());
             }
             account.setName(updatedAccount.getName());

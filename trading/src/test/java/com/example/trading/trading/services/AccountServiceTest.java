@@ -18,11 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.example.trading.trading.TestDataFactory;
 import com.example.trading.trading.dto.CreateAccountDTO;
 import com.example.trading.trading.dto.UpdateAccountDTO;
 import com.example.trading.trading.exceptions.BusinessRuleException;
 import com.example.trading.trading.exceptions.ResourceNotFoundException;
 import com.example.trading.trading.models.Account;
+import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.repositories.AccountRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,49 +36,12 @@ public class AccountServiceTest {
     @InjectMocks
     private AccountService accountService;
 
-    private CreateAccountDTO createValidAccountDTO() {
-        CreateAccountDTO dto = new CreateAccountDTO();
-        dto.setName("Test Account");
-        dto.setBalance(1000.00);
-        return dto;
-    }
-
-    private Account createValidAccount() {
-        Account account = new Account();
-        account.setId(1L);
-        account.setName("Test Account");
-        account.setBalance(1000.00);
-        account.setActive(true);
-        return account;
-    }
-
-    private UpdateAccountDTO createValidUpdateAccountDTO() {
-        UpdateAccountDTO dto = new UpdateAccountDTO();
-        dto.setName("Updated Account");
-        dto.setBalance(2000.00);
-        dto.setActive(true);
-        return dto;
-    }
-
-    private Account updatedAccount() {
-        Account account = new Account();
-        account.setId(1L);
-        account.setName("Updated Account");
-        account.setBalance(2000.00);
-        account.setActive(true);
-        return account;
-    }
-
-    private List<Account> getAccountList() {
-        return List.of(createValidAccount(), updatedAccount());
-    }
-
     // Create Account Tests
     @Test
     public void testCreateAccount() {
-        CreateAccountDTO createAccountDTO = createValidAccountDTO();
+        CreateAccountDTO createAccountDTO = TestDataFactory.createValidAccountDTO();
 
-        Account account = createValidAccount();
+        Account account = TestDataFactory.createValidAccount(1L, "Test Account");
 
         when(accountRepository.existsByName(createAccountDTO.getName())).thenReturn(false);
         when(accountRepository.save(any(Account.class))).thenReturn(account);
@@ -92,7 +57,7 @@ public class AccountServiceTest {
 
     @Test
     public void testCreateAccount_DuplicateName() {
-        CreateAccountDTO createAccountDTO = createValidAccountDTO();
+        CreateAccountDTO createAccountDTO = TestDataFactory.createValidAccountDTO();
 
         when(accountRepository.existsByName(createAccountDTO.getName())).thenReturn(true);
 
@@ -104,7 +69,7 @@ public class AccountServiceTest {
 
     @Test
     public void testCreateAccount_InvalidBalance() {
-        CreateAccountDTO createAccountDTO = createValidAccountDTO();
+        CreateAccountDTO createAccountDTO = TestDataFactory.createValidAccountDTO();
         createAccountDTO.setBalance(-100.00);
 
         when(accountRepository.existsByName(createAccountDTO.getName())).thenReturn(false);
@@ -117,9 +82,9 @@ public class AccountServiceTest {
 
     @Test
     public void testCreateAccount_NullBalance() {
-        CreateAccountDTO createAccountDTO = createValidAccountDTO();
+        CreateAccountDTO createAccountDTO = TestDataFactory.createValidAccountDTO();
         createAccountDTO.setBalance(null);
-        Account account = createValidAccount();
+        Account account = TestDataFactory.createValidAccount(1L, "Test Account");
         account.setBalance(0.0);
 
         when(accountRepository.existsByName(createAccountDTO.getName())).thenReturn(false);
@@ -131,8 +96,8 @@ public class AccountServiceTest {
 
     @Test
     public void testCreateAccount_Active() {
-        CreateAccountDTO createAccountDTO = createValidAccountDTO();
-        Account account = createValidAccount();
+        CreateAccountDTO createAccountDTO = TestDataFactory.createValidAccountDTO();
+        Account account = TestDataFactory.createValidAccount(1L, "Test Account");
 
         when(accountRepository.existsByName(createAccountDTO.getName())).thenReturn(false);
         when(accountRepository.save(any(Account.class))).thenReturn(account);
@@ -148,7 +113,7 @@ public class AccountServiceTest {
     @Test
     public void testUpdateAccount_NonExistent() {
         Long accountId = 1L;
-        UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
+        UpdateAccountDTO updateAccountDTO = TestDataFactory.createValidUpdateAccountDTO();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.empty());
 
@@ -161,10 +126,10 @@ public class AccountServiceTest {
     @Test
     public void testUpdateAccount_SameName() {
         Long accountId = 1L;
-        UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
+        UpdateAccountDTO updateAccountDTO = TestDataFactory.createValidUpdateAccountDTO();
         updateAccountDTO.setName("Test Account");
-        Account accountToUpdate = updatedAccount();
-        Account accountWithSameName = createValidAccount();
+        Account accountToUpdate = TestDataFactory.updatedAccount();
+        Account accountWithSameName = TestDataFactory.createValidAccount(2L, "Test Account");
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(accountToUpdate));
         when(accountRepository.existsByName("Test Account")).thenReturn(true);
@@ -180,9 +145,9 @@ public class AccountServiceTest {
     @Test
     public void testUpdateAccount_InvalidBalance() {
         Long accountId = 1L;
-        UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
+        UpdateAccountDTO updateAccountDTO = TestDataFactory.createValidUpdateAccountDTO();
         updateAccountDTO.setBalance(-500.00);
-        Account existingAccount = updatedAccount();
+        Account existingAccount = TestDataFactory.updatedAccount();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
 
@@ -198,7 +163,7 @@ public class AccountServiceTest {
         String newName = "Updated Account 2";
         UpdateAccountDTO updateAccountDTO = new UpdateAccountDTO();
         updateAccountDTO.setName(newName);
-        Account existingAccount = updatedAccount();
+        Account existingAccount = TestDataFactory.updatedAccount();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.save(any(Account.class))).thenReturn(existingAccount);
@@ -216,8 +181,8 @@ public class AccountServiceTest {
     @Test
     public void testUpdateAccount_NoChanges() {
         Long accountId = 1L;
-        UpdateAccountDTO updateAccountDTO = createValidUpdateAccountDTO();
-        Account existingAccount = updatedAccount();
+        UpdateAccountDTO updateAccountDTO = TestDataFactory.createValidUpdateAccountDTO();
+        Account existingAccount = TestDataFactory.updatedAccount();
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         assertThrows(BusinessRuleException.class, () -> accountService.updateAccount(accountId, updateAccountDTO));
@@ -230,7 +195,7 @@ public class AccountServiceTest {
     @Test
     public void testGetById_Existing() {
         Long accountId = 1L;
-        Account existingAccount = createValidAccount();
+        Account existingAccount = TestDataFactory.createValidAccount(1L, "Test Account");
 
         when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
         when(accountRepository.existsById(accountId)).thenReturn(true);
@@ -251,11 +216,38 @@ public class AccountServiceTest {
 
     @Test
     public void testGetAllAccounts() {
-        List<Account> accountsMock = getAccountList();
+        List<Account> accountsMock = TestDataFactory.getAccountList();
         when(accountRepository.findAll()).thenReturn(accountsMock);
         List<Account> accounts = accountService.getAllAccounts();
         assertTrue(accounts.isEmpty() == false);
         verify(accountRepository).findAll();
+    }
+
+    @Test
+    public void testGetTradesByAccountId_Existing() {
+        Long accountId = 1L;
+        Account existingAccount = TestDataFactory.createValidAccount(1L, "Test Account");
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        List<Trade> trades = accountService.getTradesByAccountId(accountId);
+        assertNotNull(trades);
+        assertTrue(!trades.isEmpty());
+
+        verify(accountRepository).findById(accountId);
+    }
+
+    @Test
+    public void testGetTradesByAccountId_WithoutTrades() {
+        Long accountId = 1L;
+        Account existingAccount = TestDataFactory.createValidAccount(1L, "Test Account");
+        existingAccount.getTrades().clear();
+
+        when(accountRepository.findById(accountId)).thenReturn(Optional.of(existingAccount));
+        List<Trade> trades = accountService.getTradesByAccountId(accountId);
+        assertNotNull(trades);
+        assertTrue(trades.isEmpty());
+
+        verify(accountRepository).findById(accountId);
     }
 
     // Delete Account Tests
