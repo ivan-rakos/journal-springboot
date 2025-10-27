@@ -29,7 +29,7 @@ public class UpdateTradeDTO {
     private String comment = "";
     @URL(message = "Screenshoot must be a valid URL")
     private String screenshoot;
-    @Size(min = 3, max = 25, message = "State must be between 3 and 25 characters")
+    @Size(max = 25, message = "State must be between 3 and 25 characters")
     private String state = "";
     private Boolean tp1;
     private Boolean tp2;

@@ -30,7 +30,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<String, String> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors()
-                .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
+                .forEach(error -> {
+                    fieldErrors.put(error.getField(), error.getDefaultMessage());
+                    System.out.println(error);
+                });
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", fieldErrors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
