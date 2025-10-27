@@ -2,6 +2,7 @@ package com.example.trading.trading.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,31 +36,38 @@ public class AccountController {
     }
 
     @GetMapping
-    public List<AccountDTO> getAccounts() {
+    public ResponseEntity<List<AccountDTO>> getAccounts() {
         List<Account> accounts = service.getAllAccounts();
-        return AccountMapper.accountToDTOList(accounts);
+        if (accounts.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(AccountMapper.accountToDTOList(accounts));
+
     }
 
     @GetMapping("/{accountId}")
-    public AccountDTO getAccountById(@PathVariable Long accountId) {
+    public ResponseEntity<AccountDTO> getAccountById(@PathVariable Long accountId) {
         Account account = service.getById(accountId).get();
-        return AccountMapper.accountToDTO(account);
+        return ResponseEntity.status(HttpStatus.OK).body(AccountMapper.accountToDTO(account));
     }
 
     @GetMapping("/{accountId}/trades")
-    public List<TradeSummaryDTO> getTradesByAccountId(@PathVariable Long accountId) {
+    public ResponseEntity<List<TradeSummaryDTO>> getTradesByAccountId(@PathVariable Long accountId) {
         List<Trade> trades = service.getTradesByAccountId(accountId);
-        return TradeMapper.tradeToSummaryDTOList(trades);
+        return ResponseEntity.status(HttpStatus.OK).body(TradeMapper.tradeToSummaryDTOList(trades));
     }
 
     @PostMapping
-    public Account create(@Valid @RequestBody CreateAccountDTO account) {
-        return service.createAccount(account);
+    public ResponseEntity<Account> create(@Valid @RequestBody CreateAccountDTO account) {
+        Account created = service.createAccount(account);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{accountId}")
-    public Account updateAccount(@PathVariable Long accountId, @Valid @RequestBody UpdateAccountDTO updatedAccount) {
-        return service.updateAccount(accountId, updatedAccount);
+    public ResponseEntity<Account> updateAccount(@PathVariable Long accountId,
+            @Valid @RequestBody UpdateAccountDTO updatedAccount) {
+        Account updated = service.updateAccount(accountId, updatedAccount);
+        return ResponseEntity.status(HttpStatus.OK).body(updated);
     }
 
     @DeleteMapping("/{accountId}")

@@ -79,7 +79,7 @@ public class TestDataFactory {
 
     public static CreateTradeDTO createValidTradeDTO() {
         CreateTradeDTO dto = new CreateTradeDTO();
-        dto.setType("BUY");
+        dto.setType("SHORT");
         dto.setSymbol("EURUSD");
         dto.setStrategy("Scalping");
         dto.setSession("London");
@@ -94,6 +94,13 @@ public class TestDataFactory {
         dto.setDate(LocalDate.now());
         dto.setAccountIds(List.of(1L));
         return dto;
+    }
+
+    public static List<Trade> getTradeList() {
+        Trade trade1 = createValidTradeWithAccount();
+        Trade trade2 = createValidTradeWithAccount();
+        trade2.setId(2L);
+        return List.of(trade1, trade2);
     }
 
 }

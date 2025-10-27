@@ -3,6 +3,7 @@ package com.example.trading.trading.controllers;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,27 +33,27 @@ public class TradeController {
     }
 
     @GetMapping
-    public List<TradeDTO> getAllTrades() {
+    public ResponseEntity<List<TradeDTO>> getAllTrades() {
         List<Trade> trades = service.getAllTrades();
-        return TradeMapper.tradeToDTOList(trades);
+        return ResponseEntity.status(HttpStatus.OK).body(TradeMapper.tradeToDTOList(trades));
     }
 
     @GetMapping("/{tradeId}")
-    public TradeDTO getTradeById(@PathVariable Long tradeId) {
+    public ResponseEntity<TradeDTO> getTradeById(@PathVariable Long tradeId) {
         Optional<Trade> trade = service.getTradeById(tradeId);
-        return TradeMapper.tradeToDTO(trade.get());
+        return ResponseEntity.status(HttpStatus.OK).body(TradeMapper.tradeToDTO(trade.get()));
     }
 
     @PostMapping
-    public TradeDTO createTrade(@Valid @RequestBody CreateTradeDTO tradeDTO) {
+    public ResponseEntity<TradeDTO> createTrade(@Valid @RequestBody CreateTradeDTO tradeDTO) {
         Trade trade = service.addTrade(tradeDTO);
-        return TradeMapper.tradeToDTO(trade);
+        return ResponseEntity.status(HttpStatus.CREATED).body(TradeMapper.tradeToDTO(trade));
     }
 
     @PatchMapping("/{tradeId}")
-    public TradeDTO updateTrade(@PathVariable Long tradeId, @Valid @RequestBody UpdateTradeDTO trade) {
+    public ResponseEntity<TradeDTO> updateTrade(@PathVariable Long tradeId, @Valid @RequestBody UpdateTradeDTO trade) {
         Trade tradeUpdated = service.updateTrade(tradeId, trade);
-        return TradeMapper.tradeToDTO(tradeUpdated);
+        return ResponseEntity.status(HttpStatus.OK).body(TradeMapper.tradeToDTO(tradeUpdated));
     }
 
     @DeleteMapping("/{tradeId}")
