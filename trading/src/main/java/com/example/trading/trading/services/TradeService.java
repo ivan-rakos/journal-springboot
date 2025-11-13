@@ -15,7 +15,10 @@ import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.repositories.AccountRepository;
 import com.example.trading.trading.repositories.TradeRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class TradeService {
 
     private final TradeRepository repo;
@@ -27,16 +30,21 @@ public class TradeService {
     }
 
     public List<Trade> getAllTrades() {
+        log.info("[START] TradeService -> getAllTrades");
+        log.info("[END] TradeService -> getAllTrades");
         return repo.findAll();
     }
 
     public Optional<Trade> getTradeById(Long tradeId) {
+        log.info("[START] TradeService -> getTradeById");
         if (!repo.existsById(tradeId))
             throw new ResourceNotFoundException("Trade with id " + tradeId + " not found");
+        log.info("[END] TradeService -> getTradeById");
         return repo.findById(tradeId);
     }
 
     public Trade addTrade(CreateTradeDTO tradeDTO) {
+        log.info("[START] TradeService -> addTrade");
         Trade trade = new Trade();
         trade.setSymbol(tradeDTO.getSymbol());
         trade.setType(tradeDTO.getType());
@@ -59,10 +67,12 @@ public class TradeService {
         trade.setAccounts(accounts);
 
         accounts.forEach(account -> account.getTrades().add(trade));
+        log.info("[END] TradeService -> addTrade");
         return repo.save(trade);
     }
 
     public Trade updateTrade(Long id, UpdateTradeDTO dto) {
+        log.info("[START] TradeService -> updateTrade");
         Trade trade = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Trade not found " + id));
 
@@ -118,10 +128,12 @@ public class TradeService {
             // Update inverse side as well to keep in-memory state consistent
             trade.setAccounts(accounts);
         }
+        log.info("[END] TradeService -> updateTrade");
         return repo.save(trade);
     }
 
     public void deleteTradeById(Long id) {
+        log.info("[START] TradeService -> deleteTradeById");
         Trade trade = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Trade not found " + id));
 
@@ -129,7 +141,7 @@ public class TradeService {
             account.getTrades().remove(trade);
         }
         trade.getAccounts().clear();
-
+        log.info("[END] TradeService -> deleteTradeById");
         repo.delete(trade);
     }
 
