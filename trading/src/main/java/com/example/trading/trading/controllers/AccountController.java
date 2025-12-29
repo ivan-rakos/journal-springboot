@@ -24,8 +24,10 @@ import com.example.trading.trading.models.Trade;
 import com.example.trading.trading.services.AccountService;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/accounts")
 public class AccountController {
 
@@ -37,7 +39,9 @@ public class AccountController {
 
     @GetMapping
     public ResponseEntity<List<AccountDTO>> getAccounts() {
+        log.info("[START] AccountController -> getAllAccounts");
         List<Account> accounts = service.getAllAccounts();
+        log.info("[END] AccountController -> getAllAccounts");
         if (accounts.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -47,32 +51,42 @@ public class AccountController {
 
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountDTO> getAccountById(@PathVariable Long accountId) {
+        log.info("[START] AccountController -> getAccountById");
         Account account = service.getById(accountId).get();
+        log.info("[END] AccountController -> getAccountById");
         return ResponseEntity.status(HttpStatus.OK).body(AccountMapper.accountToDTO(account));
     }
 
     @GetMapping("/{accountId}/trades")
     public ResponseEntity<List<TradeSummaryDTO>> getTradesByAccountId(@PathVariable Long accountId) {
+        log.info("[START] AccountController -> getTradesByAccountId");
         List<Trade> trades = service.getTradesByAccountId(accountId);
+        log.info("[END] AccountController -> getTradesByAccountId");
         return ResponseEntity.status(HttpStatus.OK).body(TradeMapper.tradeToSummaryDTOList(trades));
     }
 
     @PostMapping
-    public ResponseEntity<Account> create(@Valid @RequestBody CreateAccountDTO account) {
+    public ResponseEntity<Account> createAccount(@Valid @RequestBody CreateAccountDTO account) {
+        log.info("[START] AccountController -> createAccount");
         Account created = service.createAccount(account);
+        log.info("[END] AccountController -> createAccount");
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PatchMapping("/{accountId}")
     public ResponseEntity<Account> updateAccount(@PathVariable Long accountId,
             @Valid @RequestBody UpdateAccountDTO updatedAccount) {
+        log.info("[START] AccountController -> updateAccount");
         Account updated = service.updateAccount(accountId, updatedAccount);
+        log.info("[END] AccountController -> updateAccount");
         return ResponseEntity.status(HttpStatus.OK).body(updated);
     }
 
     @DeleteMapping("/{accountId}")
-    public ResponseEntity<Void> delete(@PathVariable Long accountId) {
+    public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId) {
+        log.info("[START] AccountController -> deleteAccount");
         service.deleteAccount(accountId);
+        log.info("[END] AccountController -> deleteAccount");
         return ResponseEntity.noContent().build();
     }
 

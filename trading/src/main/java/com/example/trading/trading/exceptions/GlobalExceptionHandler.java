@@ -9,13 +9,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", ex.getMessage());
+        log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
@@ -23,6 +27,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleBusinessRuleException(BusinessRuleException ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", ex.getMessage());
+        log.warn(ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -36,6 +41,7 @@ public class GlobalExceptionHandler {
                 });
         Map<String, Object> errorResponse = new HashMap<>();
         errorResponse.put("error", fieldErrors);
+        log.warn("DTO validation failed");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
@@ -43,6 +49,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "An unexpected error occurred: " + ex.getMessage());
+        log.error("An unexpected error occurred: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }

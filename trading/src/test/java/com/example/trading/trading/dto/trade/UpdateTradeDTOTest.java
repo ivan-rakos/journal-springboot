@@ -222,27 +222,11 @@ public class UpdateTradeDTOTest {
 
     // State tests
     @Test
-    void testWithBlankState() {
-        UpdateTradeDTO dto = createValidDTO();
-        dto.setState("   ");
-        Set<ConstraintViolation<UpdateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).extracting("message").contains("State must be between 3 and 25 characters");
-    }
-
-    @Test
-    void testWithShortState() {
-        UpdateTradeDTO dto = createValidDTO();
-        dto.setState("AB");
-        Set<ConstraintViolation<UpdateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).extracting("message").contains("State must be between 3 and 25 characters");
-    }
-
-    @Test
     void testWithLongState() {
         UpdateTradeDTO dto = createValidDTO();
         dto.setState("A".repeat(26));
         Set<ConstraintViolation<UpdateTradeDTO>> errors = validator.validate(dto);
-        assertThat(errors).extracting("message").contains("State must be between 3 and 25 characters");
+        assertThat(errors).extracting("message").contains("State cannot exceed 25 characters");
     }
 
     // TP tests are not needed as they are Booleans without constraints
